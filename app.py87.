@@ -1,0 +1,114 @@
+import json
+import os
+
+DATA_FILE = "money_data.json"
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    else:
+        return {"income": [], "expenses": []}
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+data = load_data()
+
+def add_income(amount, source):
+    data["income"].append({"amount": amount, "source": source})
+    save_data(data)
+    print(f"✅ Added income: {amount} from {source}")
+
+def spend(amount, category):
+    data["expenses"].append({"amount": amount, "category": category})
+    save_data(data)
+    print(f"💸 Recorded expense: {amount} for {category}")
+
+def remove(amount, category):
+    for i, expense in enumerate(data["expenses"]):
+        if expense["amount"] == amount and expense["category"] == category:
+            del data["expenses"][i]
+            save_data(data)
+            print(f"🧾 Removed expense: {amount} for {category}")
+            return
+    print("⚠️ Expense not found.")
+
+def show_balance():
+    total_income = sum(i["amount"] for i in data["income"])
+    total_expense = sum(e["amount"] for e in data["expenses"])
+    print(f"💰 Current balance: {total_income - total_expense} Riyals")
+
+def show_savings():
+    total_income = sum(i["amount"] for i in data["income"])
+    total_expense = sum(e["amount"] for e in data["expenses"])
+    print(f"📈 Total savings: {total_income - total_expense} Riyals")
+
+def list_expenses():
+    print("📋 Expenses:")
+    for e in data["expenses"]:
+        print(f"- {e['amount']} Riyals for {e['category']}")
+
+def list_income():
+    print("📋 Income:")
+    for i in data["income"]:
+        print(f"- {i['amount']} Riyals from {i['source']}")
+
+def predict_balance():
+    show_balance()  # Simple prediction for now
+
+def help_menu():
+    print("""
+🛠️ Available Commands:
+- add_income <amount> <source>
+- spend <amount> <category>
+- remove <amount> <category>
+- show_balance
+- show_savings
+- list_expenses
+- list_income
+- predict_balance
+- help
+- exit
+""")
+
+def main():
+    print("🪙 Welcome to Riyal Tracker")
+    help_menu()
+    while True:
+        cmd = input(">> ").strip().split()
+        if not cmd:
+            continue
+        action = cmd[0]
+        args = cmd[1:]
+
+        try:
+            if action == "add_income":
+                add_income(float(args[0]), args[1])
+            elif action == "spend":
+                spend(float(args[0]), args[1])
+            elif action == "remove":
+                remove(float(args[0]), args[1])
+            elif action == "show_balance":
+                show_balance()
+            elif action == "show_savings":
+                show_savings()
+            elif action == "list_expenses":
+                list_expenses()
+            elif action == "list_income":
+                list_income()
+            elif action == "predict_balance":
+                predict_balance()
+            elif action == "help":
+                help_menu()
+            elif action == "exit":
+                print("👋 Goodbye!")
+                break
+            else:
+                print("❓ Unknown command. Type 'help' to see available commands.")
+        except (IndexError, ValueError):
+            print("⚠️ Invalid input. Please check your command format.")
+
+if __name__ == "__main__":
+    main()
